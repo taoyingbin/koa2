@@ -22,7 +22,7 @@ var sequelize = new Sequelize(config.database, config.user, config.password, {
         maxIdleTime: 10000
     },
     logging: function (sql) {
-        console.log(sql);
+        //console.log(sql);
     }
 });
 

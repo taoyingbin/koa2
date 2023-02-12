@@ -47,7 +47,7 @@ var messagePageInput=new GraphQLInputObjectType({
             description: "每页条数"
         },
         pIndex: {
-            type: GraphQLNonNull(GraphQLInt),
+            type: new GraphQLNonNull(GraphQLInt),
             description: "分页索引（页码）",
         },
         title: {
@@ -61,8 +61,24 @@ var messagePage=new GraphQLObjectType({
     name:'messagePage',
     description:"message分页输出类型",
     fields: {
-        messagelist: {type: GraphQLList(message), description: "信息列表"},
-        count: {type: GraphQLInt, description: "总条数"},
+        messagelist: {
+            type: GraphQLList(message),
+            description: "信息列表",
+            async resolve(parent, args,context,info) {
+                //console.log("传参1---" + JSON.stringify(parent));
+                let list = await messageservice.getMessagelistBy(parent.psize, parent.pIndex);
+                return list;
+            }
+        },
+        count: {
+            type: GraphQLInt,
+            description: "总条数",
+            async resolve(parent, args) {
+               // console.log(JSON.stringify(parent));
+                let ret= await  messageservice.getMessageCountBy("");
+                return ret;
+            }
+        },
     }
 })
 
@@ -79,18 +95,16 @@ var messageInput=new GraphQLInputObjectType({
 var querySchema=new GraphQLObjectType({
     name:'messageQuerySchema',
     description:'信息管理查询Schema',
-    fields:{
-        getMessagelist:{
-            type:messagePage,
-            description:"获取信息列表并分页",
+    fields: {
+        getMessagelist: {
+            type: messagePage,
+            description: "获取信息列表并分页",
             args: {
-                data: { type: new GraphQLNonNull(messagePageInput) }
+                data: {type: messagePageInput}
             },
-            async resolve(parent, args,context,info){
-                console.log("传入参数:"+JSON.stringify(args));
-                //固定参数 ==> args.psize,args.pIndex,args.title
-                let {messagelist, count }=await messageservice.getMessageBy(10,1);
-                return {messagelist, count}
+            async resolve(_, args, context, info) {
+                //向下传参 resolve
+                return {psize: args.data.psize, pIndex: args.data.pIndex};
             }
         },
         getMessageById: {
@@ -103,16 +117,16 @@ var querySchema=new GraphQLObjectType({
                 //console.log("传入参数:"+JSON.stringify(args));args.Id
                 //主框架处理错误
                 //throw new GraphQLError("111") ;
-                let Id=args.Id||0;
+                let Id = args.Id || 0;
                 let result = await messageservice.getMessageById(Id);
                 return result || {};
             }
         },
-        getMessageChannelById:{
-            type:channel,
-            description:"根根Id获取信息通道实体",
-            args:{
-                channelId:{type: new GraphQLNonNull(GraphQLInt)}
+        getMessageChannelById: {
+            type: channel,
+            description: "根根Id获取信息通道实体",
+            args: {
+                channelId: {type: new GraphQLNonNull(GraphQLInt)}
             },
             async resolve(parent, args, context, info) {
                 let Id = args.channelId || 0;

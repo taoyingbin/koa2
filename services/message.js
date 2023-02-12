@@ -10,7 +10,11 @@ const db =require("../models/otherContext/")
 const models = db.sequelize.models;
 const _ =require('underscore');
 const moment=require("moment");
+
 const channelServer=require("../services/channel");
+const {json} = require("sequelize/lib/utils");
+const {errors} = require("sequelize/lib/instance-validator");
+
 const handler = module.exports = {};
 
 /**
@@ -72,6 +76,47 @@ handler.getMessageBy=function (psize,pIndex){
         throw  ex;
     });
 }
+
+handler.getMessagelistBy=function (psize,pIndex) {
+    return models.tb_message.findAll({
+        attributes: ['Id', 'channelId', 'title', 'content', 'createdAt', 'status'],
+        where: {'status': 1},
+        raw: true,
+        order: [['createdAt', 'DESC']],
+        limit: psize,                  // 每页多少条
+        offset: psize * (pIndex - 1)  // 跳过多少条
+    }).then((rows) => {
+        ///console.log("rows:"+JSON.stringify(rows));
+        if (rows && rows.length > 0) {
+            let cId = _.chain(rows).pluck('channelId').uniq().value();
+            console.log("cId"+JSON.stringify(cId));
+            return channelServer.getChannelByIds(cId).then(ret => {
+                let list = _.chain(rows).map(function (item) {
+                    item.channel = _.chain(ret).where({Id: item.channelId}).first().value() || {Id: 1, name: '1'};
+                    //delete item.channelId;
+                    let dt = moment(item.createdAt).format("YYYY-MM-DD HH:mm:ss")
+                    item.createdAt = dt;
+                    return item
+                }).value();
+              return list
+            })
+        } else
+            return [];
+    }).catch(err => {
+        throw  err;
+    });
+}
+handler.getMessageCountBy=function (where){
+    return models.tb_message.findAll({
+        attributes: [[db.sequelize.fn('COUNT', db.sequelize.col('Id')), 'count']],
+        where: {'status': 1},
+        raw: true,
+    }).then(ret=>{
+        return ret&&ret.length>0?ret[0].count:0;
+    }).catch(err=> {
+        throw err;
+    })
+};
 
 /**
  * 根据Id获取信息

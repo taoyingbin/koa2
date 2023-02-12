@@ -55,10 +55,10 @@ app.use(mount('/message/v1/',
             },
             customFormatErrorFn: error => {
                 //统一主架构错误
-                console.log("graph统一处理:" + JSON.stringify(error))
+                //console.log("graph统一处理:" + JSON.stringify(error))
                 //写一个中间件处理GRAPH内部错误，由主框架统一处理。
-                throw new apiError(apiErrorCode.SERVER_ERROR, "", JSON.stringify(error));
-                return;
+                //throw new apiError(apiErrorCode.SERVER_ERROR, "", JSON.stringify(error));
+                //return;
             }
         }
     )));

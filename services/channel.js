@@ -55,15 +55,21 @@ handler.getChannelBy=function (Id){
  * @author ctyb
  * @create 2023/02/11
  **/
-handler.getChannelByIds=function (Ids){
+handler.getChannelByIds=function (Ids) {
+
+    console.log("Ids:"+JSON.stringify(Ids))
+
     return models.tb_channel.findAll({
         attributes: ['Id', 'name'],
-        raw:true,
-        //whereIn: {'Id': Ids}, //没有数据暂时不按条件找出数据
-    }).then(ret=>{
-        return ret ||[];
-    }).catch(ex => {
-        throw new apiError(apiErrorCode.FAIL,"error",JSON.stringify(err));
+        raw: true,
+        where: {
+            Id: Ids
+        }
+    }).then(ret => {
+        return ret || [];
+    }).catch(err => {
+        //console.log("err:"+JSON.stringify(err))
+        throw new apiError(apiErrorCode.FAIL, "error", JSON.stringify(err));
     });
 }
 
