@@ -89,7 +89,7 @@ handler.getMessagelistBy=function (psize,pIndex) {
         ///console.log("rows:"+JSON.stringify(rows));
         if (rows && rows.length > 0) {
             let cId = _.chain(rows).pluck('channelId').uniq().value();
-            console.log("cId"+JSON.stringify(cId));
+            //console.log("cId"+JSON.stringify(cId));
             return channelServer.getChannelByIds(cId).then(ret => {
                 let list = _.chain(rows).map(function (item) {
                     item.channel = _.chain(ret).where({Id: item.channelId}).first().value() || {Id: 1, name: '1'};

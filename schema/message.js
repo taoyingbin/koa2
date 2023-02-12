@@ -100,7 +100,7 @@ var querySchema=new GraphQLObjectType({
             type: messagePage,
             description: "获取信息列表并分页",
             args: {
-                data: {type: messagePageInput}
+                data: {type: new GraphQLNonNull(messagePageInput)}
             },
             async resolve(_, args, context, info) {
                 //向下传参 resolve
