@@ -15,7 +15,6 @@ const messageservice= require("../services/message");
 const channelService=require("../services/channel");
 
 const _ =require('underscore');
-const {errors} = require("sequelize/lib/instance-validator");
 
 //定义schema
 var channel=new GraphQLObjectType({
@@ -114,9 +113,6 @@ var querySchema=new GraphQLObjectType({
                 Id: {type: new GraphQLNonNull(GraphQLInt)}
             },
             async resolve(parent, args, context, info) {
-                //console.log("传入参数:"+JSON.stringify(args));args.Id
-                //主框架处理错误
-                //throw new GraphQLError("111") ;
                 let Id = args.Id || 0;
                 let result = await messageservice.getMessageById(Id);
                 return result || {};

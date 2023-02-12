@@ -16,12 +16,6 @@ const koa = require('koa');
 const path = require("path");
 const router = require('./routes/');//主程路由
 const handleError=require("./middlewares/handleError");
-const apiErrorCode=require("./utils/ApiErrorCode");
-const apiError= require("./utils/ApiError");
-//graphql
-const mount = require('koa-mount');
-const { graphqlHTTP } = require('koa-graphql');
-const messageSchema = require("./schema/message");
 
 const app = new koa();
 
@@ -44,25 +38,6 @@ app.use(handleError(err=>{
 //错误处理-end
 
 //2、response输出进行格式化处理
-
-//7、 挂载graph模板，后期把他写成Apollo 与源合并（暂时先这样子写）
-app.use(mount('/message/v1/',
-    graphqlHTTP({
-            schema: messageSchema,
-            graphiql: true,
-            context: () => {
-                //处理认证上下文
-            },
-            customFormatErrorFn: error => {
-                //统一主架构错误
-                //console.log("graph统一处理:" + JSON.stringify(error))
-                //写一个中间件处理GRAPH内部错误，由主框架统一处理。
-                //throw new apiError(apiErrorCode.SERVER_ERROR, "", JSON.stringify(error));
-                //return;
-            }
-        }
-    )));
-
 //4、加载主程路由索引
 app.use(router.routes()).use(router.allowedMethods());
 //启动端口
