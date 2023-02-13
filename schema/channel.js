@@ -38,7 +38,6 @@ var rootQuerySchema=new GraphQLObjectType({
     }
 });
 
-
 //挂schema
 module.exports=new GraphQLSchema({
     query:rootQuerySchema,

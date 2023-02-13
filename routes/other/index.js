@@ -8,7 +8,7 @@ const Router = require("@koa/router");
 const {graphqlHTTP} = require("koa-graphql");
 const messageSchema = require("../../schema/message");
 let router = new Router();
-//router.prefix("/other");
+
 router.all(
     '/other/v1',
     graphqlHTTP({

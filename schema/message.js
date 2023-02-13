@@ -7,13 +7,11 @@
 const {
     GraphQLObjectType, GraphQLString,
     GraphQLInt, GraphQLList, GraphQLSchema,
-    GraphQLInputObjectType, GraphQLNonNull,
-    GraphQLError
+    GraphQLInputObjectType, GraphQLNonNull
 }=require("graphql");
 //数据源服务
 const messageservice= require("../services/message");
 const channelService=require("../services/channel");
-
 const _ =require('underscore');
 
 //定义schema
@@ -25,12 +23,21 @@ var channel=new GraphQLObjectType({
         name: {type: GraphQLString, description: "信息通道名称"}
     }
 })
+
 var message=new GraphQLObjectType({
     name:'message',
     description:"信息实体",
     fields: {
         Id: {type: GraphQLInt, description: "信息主銉ID"},
-        channel: {type: channel, description: "信息所属通道"},
+        channel: {
+            type: channel,
+            description: "信息所属通道",
+            async resolve(parent,args) {
+                let Id = parent.channelId || 0;
+                let result = await channelService.getChannelBy(Id);
+                return result;
+            }
+        },
         title: {type: GraphQLString, description: "标题"},
         content: {type: GraphQLString, description: "具体内容"},
         createdAt: {type: GraphQLString, description: "创建时间"},
@@ -47,7 +54,7 @@ var messagePageInput=new GraphQLInputObjectType({
         },
         pIndex: {
             type: new GraphQLNonNull(GraphQLInt),
-            description: "分页索引（页码）",
+            description: "分页索引（页码）"
         },
         title: {
             type: GraphQLString,
@@ -97,12 +104,11 @@ var querySchema=new GraphQLObjectType({
     fields: {
         getMessagelist: {
             type: messagePage,
-            description: "获取信息列表并分页",
+            description: "获取信息列表",
             args: {
                 data: {type: new GraphQLNonNull(messagePageInput)}
             },
             async resolve(_, args, context, info) {
-                //向下传参 resolve
                 return {psize: args.data.psize, pIndex: args.data.pIndex};
             }
         },
@@ -115,7 +121,7 @@ var querySchema=new GraphQLObjectType({
             async resolve(parent, args, context, info) {
                 let Id = args.Id || 0;
                 let result = await messageservice.getMessageById(Id);
-                return result || {};
+                return result;
             }
         },
         getMessageChannelById: {
@@ -131,7 +137,7 @@ var querySchema=new GraphQLObjectType({
             }
         }
     }
-})
+});
 
 var mutationSchema=new GraphQLObjectType({
     name:'messageMutationSchema',
@@ -178,7 +184,7 @@ var mutationSchema=new GraphQLObjectType({
             }
         }
     }
-})
+});
 
 //挂schema并对面输出
 module.exports=new GraphQLSchema({

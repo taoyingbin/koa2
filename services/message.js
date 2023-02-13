@@ -132,15 +132,8 @@ handler.getMessageById=function (Id){
         raw: true
     }).then(ret=>{
        if(!(_.isNull(ret)||_.isEmpty(ret))){
-           //海量数据会有锁的问题,处理问题略
-           return channelServer.getChannelBy(ret.channelId).then(channel=>{
-                ret.channel=channel;
-                ret.createdAt=moment(ret.createdAt).format("YYYY-MM-DD HH:mm:ss.SSS");
-                delete ret.channelId;
-                return ret;
-           }).catch(err=>{
-               throw  err;
-           });
+           ret.createdAt=moment(ret.createdAt).format("YYYY-MM-DD HH:mm:ss.SSS");
+           return  ret;
        }else {
            return {Id: 0, channel: {Id: 0, name: ""}, title: '', content: '', createdAt: '', status: ''}
        }
@@ -148,3 +141,4 @@ handler.getMessageById=function (Id){
         throw new apiError(apiErrorCode.FAIL,"error",JSON.stringify(err));
     })
 }
+

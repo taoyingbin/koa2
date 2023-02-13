@@ -56,15 +56,12 @@ handler.getChannelBy=function (Id){
  * @create 2023/02/11
  **/
 handler.getChannelByIds=function (Ids) {
-
-    console.log("Ids:"+JSON.stringify(Ids))
-
     return models.tb_channel.findAll({
         attributes: ['Id', 'name'],
-        raw: true,
         where: {
             Id: Ids
-        }
+        },
+        raw: true
     }).then(ret => {
         return ret || [];
     }).catch(err => {
